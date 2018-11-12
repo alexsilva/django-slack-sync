@@ -1,7 +1,8 @@
 # coding=utf-8
 from django.core.management import BaseCommand
 from django.utils.translation import gettext_lazy as _
-from slackbot.bot import Bot
+
+from slack_sync.bot import Bot
 from slack_sync.signals import before_bot_run
 
 
