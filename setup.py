@@ -8,5 +8,6 @@ setup(
     license='MIT',
     author='alex',
     author_email='alex@fabricadigital.com.br',
-    description='Synchronizing slack users and sending targeted messages.'
+    description='Synchronizing slack users and sending targeted messages.',
+    install_requires=['slackbot']
 )
