@@ -7,5 +7,5 @@ class SlackSyncApp(AppConfig):
     verbose_name = _("Slack Sync")
 
     def ready(self):
-        from .signals import ready
+        from .signals_connect import ready
         ready(self)  # link
