@@ -1,6 +1,7 @@
 import os
 import random
 import ssl
+import time
 from select import select
 from ssl import SSLError
 
@@ -21,6 +22,9 @@ class SlackClient(slackclient.SlackClient):
     def __init__(self, *args, **kwargs):
         self.websocket_options = kwargs.pop("websocket_options", {})
         self.websocket_options.setdefault("timeout", 5.0)
+        self.reconnect_options = kwargs.pop("reconnect_options", {})
+        self.reconnect_options.setdefault("retry", 5)
+        self.reconnect_options.setdefault("delay", 15.0)
         super(SlackClient, self).__init__(*args, **kwargs)
         self.session = requests.session()
         self.webapi = slacker.Slacker(self.token, session=self.session)
@@ -49,6 +53,18 @@ class SlackClient(slackclient.SlackClient):
         )
         self.websocket.sock.setblocking(0)
         self.websocket_safe_read()  # socket flush
+
+    def reconnect(self):
+        index = 0
+        while index < self.reconnect_options['retry']:
+            try:
+                self.rtm_connect()
+                self.logger.warning('reconnected to slack rtm websocket')
+                return
+            except Exception as e:
+                index += 1
+                self.logger.exception('failed to reconnect: %s', e)
+                time.sleep(self.reconnect_options['delay'])
 
     def websocket_safe_read(self):
         """Returns data if available, otherwise ''. Newlines indicate multiple messages """
