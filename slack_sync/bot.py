@@ -16,7 +16,7 @@ class Bot(bot.Bot):
             bot_emoji=settings.get("BOT_EMOJI", None),
             connect=False
         )
-        self._client.rtm_connect(startup=True)
+        self._client.rtm_smart_connect(startup=True)
         self._plugins = PluginsManager()
         self._dispatcher = MessageDispatcher(self._client, self._plugins,
                                              settings.ERRORS_TO)
