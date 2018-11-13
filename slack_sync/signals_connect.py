@@ -21,7 +21,7 @@ email_field_name = settings.get("SLACK_SYNC_EMAIL_FIELD_NAME", "email")
 
 @receiver(after_client_connection, dispatch_uid="do-sync-users")
 def do_sync_users(sender, **kwargs):
-    if not (user_sync_enable or kwargs['startup']):
+    if not user_sync_enable or not kwargs['startup']:
         # will only synchronize user at boot boot.
         return
     users = kwargs['client'].users
