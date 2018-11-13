@@ -19,6 +19,9 @@ email_field_name = settings.get("SLACKBOT_EMAIL_FIELD_NAME", "email")
 
 @receiver(after_client_connection, dispatch_uid="do-sync-users")
 def do_sync_users(sender, **kwargs):
+    if not kwargs['startup']:
+        # will only synchronize user at boot boot.
+        return
     users = kwargs['client'].users
     for pk in users.iterkeys():
         user = users[pk]

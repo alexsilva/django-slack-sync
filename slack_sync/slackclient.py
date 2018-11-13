@@ -7,11 +7,13 @@ class SlackClient(slackclient.SlackClient):
     """Additional Apis """
 
     def rtm_connect(self, *args, **kwargs):
+        startup = kwargs.pop('startup', False)
         retval = super(SlackClient, self).rtm_connect(*args, **kwargs)
         # Sends a signal after connecting to the server.
         try:
             after_client_connection.send(sender=self.__class__,
-                                         client=self)
+                                         client=self,
+                                         startup=startup)
         except Exception:
             slackclient.logger.exception("signal after-client-connection")
         return retval

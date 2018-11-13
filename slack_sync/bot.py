@@ -13,8 +13,10 @@ class Bot(bot.Bot):
         self._client = SlackClient(
             settings.SLACKBOT_API_TOKEN,
             bot_icon=settings.get("BOT_ICON", None),
-            bot_emoji=settings.get("BOT_EMOJI", None)
+            bot_emoji=settings.get("BOT_EMOJI", None),
+            connect=False
         )
+        self._client.rtm_connect(startup=True)
         self._plugins = PluginsManager()
         self._dispatcher = MessageDispatcher(self._client, self._plugins,
                                              settings.ERRORS_TO)
