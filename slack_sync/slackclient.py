@@ -19,10 +19,11 @@ class SlackClient(slackclient.SlackClient):
     """Additional Apis """
 
     def __init__(self, *args, **kwargs):
+        self.websocket_options = kwargs.pop("websocket_options", {})
+        self.websocket_options.setdefault("timeout", 5.0)
         super(SlackClient, self).__init__(*args, **kwargs)
         self.session = requests.session()
         self.webapi = slacker.Slacker(self.token, session=self.session)
-        self.timeout = 5.0
 
     def parse_slack_login_data(self, login_data):
         self.login_data = login_data
@@ -44,7 +45,7 @@ class SlackClient(slackclient.SlackClient):
             http_proxy_host=proxy,
             http_proxy_port=proxy_port,
             http_no_proxy=no_proxy,
-            timeout=self.timeout
+            **self.websocket_options
         )
         self.websocket.sock.setblocking(0)
         self.websocket_safe_read()  # socket flush
@@ -66,7 +67,6 @@ class SlackClient(slackclient.SlackClient):
                     self.logger.warning('Websocket exception: %s', err)
                 self.reconnect()
             except SSLError as err:
-                print err
                 if err.errno != ssl.SSL_ERROR_WANT_READ:
                     self.logger.warning('SSLError in websocket_safe_read: %s', err)
                 break
