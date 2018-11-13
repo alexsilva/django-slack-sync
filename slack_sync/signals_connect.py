@@ -11,11 +11,12 @@ from .signals import after_client_connection
 User = get_user_model()
 
 user_sync_enable = settings.get("SLACK_SYNC_USER_ENABLE", False)
-username_callback = settings.get("SLACKBOT_USERNAME_CALLBACK",
+username_callback = settings.get("SLACK_SYNC_USERNAME_CALLBACK",
                                  "slack_sync.callbacks.create_username")
-username_callback = import_string(username_callback)
-user_groups_filters = settings.get("SLACKBOT_USER_GROUPS_FILTERS", {})
-email_field_name = settings.get("SLACKBOT_EMAIL_FIELD_NAME", "email")
+if user_sync_enable:
+    username_callback = import_string(username_callback)
+user_groups_filters = settings.get("SLACK_SYNC_USER_GROUPS_FILTERS", {})
+email_field_name = settings.get("SLACK_SYNC_EMAIL_FIELD_NAME", "email")
 
 
 @receiver(after_client_connection, dispatch_uid="do-sync-users")

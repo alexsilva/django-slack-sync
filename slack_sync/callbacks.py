@@ -3,7 +3,7 @@ from django.db import models
 
 from .conf import settings
 
-username_prefix = settings.get("SLACKBOT_USERNAME_PREFIX", "slackbot")
+username_prefix = settings.get("SLACK_SYNC_USERNAME_PREFIX", "slackbot")
 
 User = get_user_model()
 
