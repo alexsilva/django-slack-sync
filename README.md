@@ -2,6 +2,7 @@
 Settings
 -
 `SLACK_SYNC_USER_ENABLE`: Enable slack user synchronization.
+
 `SLACK_SYNC_USER_GROUPS_FILTERS`: Dictionary with group filters 
  `{'name': 'mygroup}`
 
