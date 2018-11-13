@@ -1,9 +1,9 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='django-slack-sync',
     version='1.0.0',
-    packages=['slack_sync'],
+    packages=find_packages(),
     url='https://github.com/alexsilva/django-slack-sync',
     license='MIT',
     author='alex',
