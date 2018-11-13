@@ -28,7 +28,7 @@ class SlackClient(slackclient.SlackClient):
             profile = self.users[userid]['profile']
             if 'email' in profile and profile['email'] == email:
                 return userid
-        raise ValueError("email not found!")
+        raise ValueError("email '{0!s}' not found!".format(email))
 
     @unicode_compact
     def send_user_message(self, email, text, **kwargs):
