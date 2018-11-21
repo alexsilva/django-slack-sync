@@ -149,6 +149,7 @@ class SlackClient(slackclient.SlackClient):
         try:
             channel_id = self.open_dm_channel(self.find_user_by_email(email))
             self.rtm_send_message(channel_id, text)
+            self.websocket_safe_read()
         except ValueError:
             if kwargs.get("errors", False):
                 raise
