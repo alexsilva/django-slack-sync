@@ -1,3 +1,4 @@
+# coding=utf-8
 import os
 import random
 import ssl
@@ -52,10 +53,16 @@ class SlackClient(slackclient.SlackClient):
             **self.websocket_options
         )
         self.websocket.sock.setblocking(0)
-        self.websocket_safe_read()  # socket flush
+        # with reconnect = True we fall into a kind of recursion
+        self.websocket_safe_read(reconnect=False)  # socket flush
 
     def reconnect(self):
         index = 0
+        if self.websocket_live:
+            try:
+                self.websocket.close()
+            except Exception as err:
+                self.logger.error("websocket close exception: %r" % err)
         while index < self.reconnect_options['retry']:
             try:
                 self.rtm_connect()
@@ -66,7 +73,7 @@ class SlackClient(slackclient.SlackClient):
                 self.logger.exception('failed to reconnect: %s', e)
                 time.sleep(self.reconnect_options['delay'])
 
-    def websocket_safe_read(self):
+    def websocket_safe_read(self, reconnect=True):
         """Returns data if available, otherwise ''. Newlines indicate multiple messages """
         data = ''
         while True:
@@ -81,13 +88,16 @@ class SlackClient(slackclient.SlackClient):
                     self.logger.warning('Lost websocket connection, try to reconnect now')
                 else:
                     self.logger.warning('Websocket exception: %s', err)
-                self.reconnect()
+                if reconnect:
+                    self.reconnect()
             except SSLError as err:
                 if err.errno != ssl.SSL_ERROR_WANT_READ:
                     self.logger.warning('SSLError in websocket_safe_read: %s', err)
                 break
             except Exception as e:
                 self.logger.warning('Exception in websocket_safe_read: %s', e)
+                if reconnect:
+                    self.reconnect()
                 break
         return data.strip()
 
