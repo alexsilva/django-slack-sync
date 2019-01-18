@@ -78,26 +78,33 @@ class SlackClient(slackclient.SlackClient):
         data = ''
         while True:
             try:
-                socks = select([self.websocket.sock], [], [],
-                               self.websocket.timeout)[0]
-                if self.websocket.sock not in socks:
+                websocket = self.websocket.sock
+                rsocks, wsocks, xsocks = select([websocket], [], [websocket],
+                                                self.websocket.timeout)
+                assert len(xsocks) == 0, 'socket (%r) dead!' % websocket
+                if websocket not in rsocks:
                     break
+            except Exception as err:
+                self.logger.warning('Exception in select socket: %r', err)
+                if not reconnect:
+                    break
+                self.reconnect()
+            try:
                 data += "{0}\n".format(self.websocket.recv())
             except WebSocketException as err:
                 if isinstance(err, WebSocketConnectionClosedException):
                     self.logger.warning('Lost websocket connection, try to reconnect now')
                 else:
                     self.logger.warning('Websocket exception: %s', err)
-                if reconnect:
-                    self.reconnect()
+                if not reconnect:
+                    break
+                self.reconnect()
             except SSLError as err:
                 if err.errno != ssl.SSL_ERROR_WANT_READ:
                     self.logger.warning('SSLError in websocket_safe_read: %s', err)
                 break
             except Exception as e:
                 self.logger.warning('Exception in websocket_safe_read: %s', e)
-                if reconnect:
-                    self.reconnect()
                 break
         return data.strip()
 
