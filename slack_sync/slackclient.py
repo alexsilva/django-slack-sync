@@ -1,11 +1,12 @@
 # coding=utf-8
 import os
 import random
+import socket
 import ssl
 import time
 from select import select
 from ssl import SSLError
-
+import errno
 import requests
 import slacker
 from django.utils.functional import cached_property
@@ -89,6 +90,7 @@ class SlackClient(slackclient.SlackClient):
                 if not reconnect:
                     break
                 self.reconnect()
+                break
             try:
                 data += "{0}\n".format(self.websocket.recv())
             except WebSocketException as err:
@@ -99,10 +101,16 @@ class SlackClient(slackclient.SlackClient):
                 if not reconnect:
                     break
                 self.reconnect()
+                break
             except SSLError as err:
                 if err.errno != ssl.SSL_ERROR_WANT_READ:
                     self.logger.warning('SSLError in websocket_safe_read: %s', err)
                 break
+            except socket.error as err:
+                if reconnect and err.errno in (errno.ECONNRESET,):
+                    self.logger.info("ECONNRESET reconnecting...")
+                    self.reconnect()
+                    break
             except Exception as e:
                 self.logger.warning('Exception in websocket_safe_read: %s', e)
                 break
